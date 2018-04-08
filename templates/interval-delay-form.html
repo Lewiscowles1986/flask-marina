@@ -1,0 +1,108 @@
+{% extends "layout/base.html" %}
+{% block content %}
+
+<div class="form-field">
+  <label for="Select Program">Select Program</label><select>
+    <option>Default</option>
+    <option>Custom</option>
+  </select>
+</div>
+<form method="POST" action="/">
+  {{ form.csrf_token }}
+  <div class="form-field">
+    {{ form.t1.label }} {{ form.t1() }}
+  </div>
+  <div class="form-field">
+    {{ form.t2.label }} {{ form.t2() }}
+  </div>
+  <div class="form-field">
+    {{ form.t3.label }} {{ form.t3() }}
+  </div>
+  <div class="form-field">
+    {{ form.t4.label }} {{ form.t4() }}
+  </div>
+  <div class="form-field">
+    {{ form.t5.label }} {{ form.t5() }}
+  </div>
+  <div class="form-field">
+    {{ form.t6.label }} {{ form.t6() }}
+  </div>
+  <div class="form-field">
+    {{ form.t7.label }} {{ form.t7() }}
+  </div>
+  <div class="form-field">
+    {{ form.t8.label }} {{ form.t8() }}
+  </div>
+  <div class="form-field">
+    <button type="submit">Go</button>
+    <button type="button" onclick="resetCustom(); window.location.refresh();">Forget Custom</button>
+  </div>
+</form>
+<script src="{{ url_for('static', filename='localstorage.js') }}"></script>
+<script>
+var formFilled = false;
+
+function setValueFromStore(id) {
+  var savedVal = store(id);
+  var elem = document.querySelector('#'+id);
+  if(savedVal && elem) {
+    formFilled = true;
+    elem.value = savedVal;
+  }
+}
+
+function getLastIndex() {
+  return [].slice.call(document.querySelectorAll('select > option')).length-1;
+}
+
+function showCustom() {
+  document.querySelector('select').selectedIndex = getLastIndex();
+}
+
+function getTimingFields() {
+  return [].slice.call(document.querySelectorAll('input[id^="t"]'));
+}
+
+function getData(value) {
+  console.error('Not yet implemented');
+}
+
+function resetCustom() {
+  getTimingFields().forEach( function(elem) {
+    store(elem.id, null);
+  });
+}
+
+document.querySelector('select').onchange = function() {
+  var selIdx = document.querySelector('select').selectedIndex;
+  if(selIdx == 0) {
+    getTimingFields().forEach( function(elem) {
+      elem.value = 0;
+    });
+  } else if (selIdx == getLastIndex()) {
+    getTimingFields().forEach( function(elem) {
+      setValueFromStore(elem.id);
+    });
+  } else {
+    getData(document.querySelector('select').value);
+  }
+};
+
+getTimingFields().forEach( function(elem) {
+  elem.onchange = function() {
+      showCustom()
+      console.log('#'+elem.id+':', elem.value)
+      if(elem.value.trim() == '') {
+        store(elem.id, null);
+      } else {
+        store(elem.id, elem.value);
+      }
+  }
+  setValueFromStore(elem.id);
+});
+
+if(formFilled) {
+  showCustom();
+}
+</script>
+{% endblock %}
